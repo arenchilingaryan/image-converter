@@ -34,3 +34,9 @@ export type ResultFileType = FileType & {
   fileName: string;
   token: string;
 };
+
+export type UserType = {
+  email: string;
+  password: string;
+  premiumCount: number;
+};
