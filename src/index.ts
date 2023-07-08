@@ -17,7 +17,8 @@ export const app = express();
 
 const authCommonGuards = [
   check('email').isEmail().withMessage('Must be a valid email address'),
-  check('password', 'Password is incorrect')
+  check('password')
+    .withMessage('Password is incorrect')
     .exists()
     .isLength({ min: 6, max: 20 }),
 ];
