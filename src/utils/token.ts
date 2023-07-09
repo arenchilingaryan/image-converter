@@ -12,4 +12,4 @@ export const encodeToken = (data: TokenData) => {
 };
 
 export const decodeToken = (token: string) =>
-  jwt.verify(token, envConfig.SECRET_KEY);
+  jwt.verify(token, envConfig.SECRET_KEY) as TokenData;

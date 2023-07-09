@@ -12,15 +12,18 @@ import { loginRouter } from './routes/auth/login';
 import { check } from 'express-validator';
 import { registerRouter } from './routes/auth/register';
 import './db';
+import { RequestTypeWithUserData, authGuard } from './utils/auth';
+import { UserType } from './types';
+import { paymentRouter } from './routes/payment/paymentRouter';
 
 export const app = express();
 
 const authCommonGuards = [
   check('email').isEmail().withMessage('Must be a valid email address'),
   check('password')
-    .withMessage('Password is incorrect')
     .exists()
-    .isLength({ min: 6, max: 20 }),
+    .isLength({ min: 6, max: 20 })
+    .withMessage('Password is incorrect'),
 ];
 
 app.use(cors());
@@ -33,7 +36,9 @@ app.post('/auth/login', authCommonGuards, loginRouter);
 
 app.post('/auth/register', authCommonGuards, registerRouter);
 
-app.post('/upload', uploadMiddleware, isFilesIsImage, uploadRouter);
+app.post('/payment', authGuard, paymentRouter);
+
+app.post('/upload', authGuard, uploadMiddleware, isFilesIsImage, uploadRouter);
 
 app.get('/status', statusRouter);
 

@@ -38,5 +38,5 @@ export type ResultFileType = FileType & {
 export type UserType = {
   email: string;
   password: string;
-  premiumCount: number;
+  isPaid: boolean;
 };
