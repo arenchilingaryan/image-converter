@@ -26,7 +26,11 @@ export const registerRouter = async (req: Request, res: Response) => {
     }
     const hashedPassword = hashPassword(password);
     const newUser = await admin.auth().createUser({ email, password });
-    data.push({ email, password: hashedPassword, isPaid: false });
+    data.push({
+      email,
+      password: hashedPassword,
+      paymentInfo: { current: null, expired: null },
+    });
     fs.writeFileSync(filePath, JSON.stringify(data));
     const encodeData: TokenData = {
       email,

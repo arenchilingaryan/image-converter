@@ -3,19 +3,11 @@ import { FileType } from '../types';
 import { convert } from './convert';
 
 class ActiveQueue {
-  private static instance: ActiveQueue;
   private queue: FileType[] = [];
   private processing: { [key: string]: FileType[] } = {};
   private concurrentLimit = 3;
 
-  private constructor() {}
-
-  public static getInstance(): ActiveQueue {
-    if (!ActiveQueue.instance) {
-      ActiveQueue.instance = new ActiveQueue();
-    }
-    return ActiveQueue.instance;
-  }
+  constructor() {}
 
   public getUserData(token?: string): FileType[] {
     return this.queue.filter(file => file.token === token);
@@ -88,4 +80,4 @@ class ActiveQueue {
   }
 }
 
-export const queueService = ActiveQueue.getInstance();
+export const queueService = new ActiveQueue();

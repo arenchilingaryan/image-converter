@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export type RequestFileType = {
   fieldname: string;
   originalname: string;
@@ -38,5 +40,12 @@ export type ResultFileType = FileType & {
 export type UserType = {
   email: string;
   password: string;
-  isPaid: boolean;
+  paymentInfo: {
+    expired: Date | null;
+    current: 'month' | 'year' | null;
+  };
+};
+
+export type RequestTypeWithUserData = Request & {
+  userData?: Omit<UserType, 'password'>;
 };

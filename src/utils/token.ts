@@ -11,5 +11,10 @@ export const encodeToken = (data: TokenData) => {
   return a;
 };
 
-export const decodeToken = (token: string) =>
-  jwt.verify(token, envConfig.SECRET_KEY) as TokenData;
+export const decodeToken = (token: string) => {
+  try {
+    return jwt.verify(token, envConfig.SECRET_KEY) as TokenData;
+  } catch {
+    return null;
+  }
+};

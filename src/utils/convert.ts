@@ -6,7 +6,8 @@ export const files: ResultFileType[] = [];
 export const convert = async (
   file: FileType,
   outType: 'png' | 'jpeg' | 'gif' | 'webp' | 'jpg',
-  token: string
+  token: string,
+  cbResult?: (file: ResultFileType) => void
 ) => {
   const name = file.file.originalname.split('.').shift();
   const out = outType === 'jpg' ? 'jpeg' : outType;
@@ -28,10 +29,19 @@ export const convert = async (
     await sharp(file.file.path)[out]().toFile(fileName);
   }
 
-  files.push({
-    ...file,
-    fileName,
-    token,
-    status: 'complete',
-  });
+  if (cbResult) {
+    cbResult({
+      ...file,
+      fileName,
+      token,
+      status: 'complete',
+    });
+  } else {
+    files.push({
+      ...file,
+      fileName,
+      token,
+      status: 'complete',
+    });
+  }
 };

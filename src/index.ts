@@ -11,10 +11,10 @@ import { envConfig } from './config/envConfig';
 import { loginRouter } from './routes/auth/login';
 import { check } from 'express-validator';
 import { registerRouter } from './routes/auth/register';
-import './db';
-import { RequestTypeWithUserData, authGuard } from './utils/auth';
-import { UserType } from './types';
+import { authGuard } from './utils/auth';
 import { paymentRouter } from './routes/payment/paymentRouter';
+import { paymentGuard } from './routes/payment/paymentGuard';
+import './db';
 
 export const app = express();
 
@@ -36,11 +36,11 @@ app.post('/auth/login', authCommonGuards, loginRouter);
 
 app.post('/auth/register', authCommonGuards, registerRouter);
 
-app.post('/payment', authGuard, paymentRouter);
+app.post('/payment', authGuard, paymentGuard, paymentRouter);
 
 app.post('/upload', authGuard, uploadMiddleware, isFilesIsImage, uploadRouter);
 
-app.get('/status', statusRouter);
+app.get('/status', authGuard, statusRouter);
 
 app.get('/download/:id', downloadByIdRouter);
 
