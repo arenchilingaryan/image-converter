@@ -1,9 +1,14 @@
-import { parentPort } from 'node:worker_threads';
+// !!! COMPILE BEFORE USING. COMPILATION IN THE './workerConvert.js'
+
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
+import { parentPort, isMainThread } from 'worker_threads';
 import { FileType } from '../../types';
 import { convert } from '../../utils/convert';
 
-if (!parentPort) {
-  throw new Error('Parent port is not available');
+if (!parentPort || isMainThread) {
+  throw new Error(
+    'Parent port is not available or the script is not running inside a worker'
+  );
 }
 
 parentPort.on(

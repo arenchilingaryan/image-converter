@@ -6,15 +6,34 @@ import {
   ResultFileType,
 } from '../../types';
 import { convertFilesObject } from '../../utils/convertFilesObject';
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { Worker } from 'node:worker_threads';
 
-export const uploadRouter = (req: RequestTypeWithUserData, res: Response) => {
+export const uploadRouter = async (
+  req: RequestTypeWithUserData,
+  res: Response
+) => {
   const files = req.files as RequestFileType[];
   const token = req.headers['token'] as string;
   const { inType, outType, width, height } = req.body;
   const userData = req.userData;
+  if (userData) {
+    if (!userData?.paymentInfo.current) {
+      if (outType === 'webp' || files.length > 5) {
+        return res.status(400).send({
+          error:
+            'Upgrade your status for processing more than two files or convert files to webp',
+        });
+      }
+    }
+  } else {
+    if (files.length > 2 || outType === 'webp') {
+      return res.status(400).send({
+        error: 'Sign in to system for processing more than two files',
+      });
+    }
+  }
 
   const newFiles = convertFilesObject(
     files,
@@ -32,31 +51,35 @@ export const uploadRouter = (req: RequestTypeWithUserData, res: Response) => {
       const diff = expiredDate.getTime() - dateNow.getTime();
       if (diff > 0) {
         let files: any = undefined;
-        const dirPath = `../../db/paidFiles/${userData.email}.json`;
+        const dirPath = path.join(
+          __dirname,
+          `../../db/paidFiles/${userData.email}.json`
+        );
         try {
-          files = JSON.parse(fs.readFileSync(dirPath, 'utf8'));
-        } catch (err) {
-          console.log('files not recognized');
+          files = JSON.parse(await fs.readFile(dirPath, 'utf8'));
+        } catch (error: any) {
+          if (error.code === 'ENOENT') {
+            files = [];
+          } else {
+            throw error;
+          }
         }
-        if (!files) {
-          fs.writeFileSync(dirPath, JSON.stringify(newFiles));
-        } else {
-          files.push(...newFiles);
-        }
+        files.push(...newFiles);
         newFiles.forEach(file => {
-          const worker = new Worker(path.join(__dirname, './convertWorker.js'));
+          const worker = new Worker(path.join(__dirname, './workerConvert.js'));
           worker.postMessage({
             file: file,
             outType: outType,
             token: token,
           });
-          worker.on('message', (data: ResultFileType) => {
-            files.map((file: any) => {
+          worker.on('message', async (data: ResultFileType) => {
+            const newFilesForPaidMember = files.map((file: any) => {
               if (data.hash === file.hash) {
                 return data;
               }
               return file;
             });
+            await fs.writeFile(dirPath, JSON.stringify(newFilesForPaidMember));
             worker.terminate();
           });
           worker.on('error', console.error);
@@ -73,5 +96,5 @@ export const uploadRouter = (req: RequestTypeWithUserData, res: Response) => {
     queueService.add(newFiles, outType, res);
   }
 
-  res.send({ message: 'Files successfully uploaded' });
+  return res.send({ message: 'Files successfully uploaded' });
 };

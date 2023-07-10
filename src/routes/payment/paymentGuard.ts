@@ -11,7 +11,7 @@ export const paymentGuard = (
   if (!isAuthenticated) {
     res
       .send(400)
-      .send({ error: 'Payment Failed. Please log in to your account' });
+      .send({ error: 'Payment Failed. Please sign in to your account' });
   }
   if (paymentCount === 20 || paymentCount === 164) {
     return next();

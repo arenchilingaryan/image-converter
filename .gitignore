@@ -1,5 +1,9 @@
 node_modules
 build
 .env
-users.json
-firebase.json
+uploads/*
+*.webp
+*.jpeg
+*jpg
+*png
+*.json
