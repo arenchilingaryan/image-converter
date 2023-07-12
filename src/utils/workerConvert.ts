@@ -2,8 +2,8 @@
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 import { parentPort, isMainThread } from 'worker_threads';
-import { FileType } from '../../types';
-import { convert } from '../../utils/convert';
+import { FileType } from '../types';
+import { convert } from './convert';
 
 if (!parentPort || isMainThread) {
   throw new Error(

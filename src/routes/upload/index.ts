@@ -8,7 +8,7 @@ import {
 import { convertFilesObject } from '../../utils/convertFilesObject';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Worker } from 'node:worker_threads';
+import { processingByThread } from '../../utils/mainThread';
 
 export const uploadRouter = async (
   req: RequestTypeWithUserData,
@@ -66,27 +66,22 @@ export const uploadRouter = async (
         }
         files.push(...newFiles);
         newFiles.forEach(file => {
-          const worker = new Worker(path.join(__dirname, './workerConvert.js'));
-          worker.postMessage({
-            file: file,
-            outType: outType,
-            token: token,
-          });
-          worker.on('message', async (data: ResultFileType) => {
-            const newFilesForPaidMember = files.map((file: any) => {
-              if (data.hash === file.hash) {
-                return data;
-              }
-              return file;
-            });
-            await fs.writeFile(dirPath, JSON.stringify(newFilesForPaidMember));
-            worker.terminate();
-          });
-          worker.on('error', console.error);
-          worker.on('error', error => {
-            console.error(error);
-            worker.terminate();
-          });
+          processingByThread(
+            { file, outType, token },
+            async (data: ResultFileType, worker: any) => {
+              const newFilesForPaidMember = files.map((file: any) => {
+                if (data.hash === file.hash) {
+                  return data;
+                }
+                return file;
+              });
+              await fs.writeFile(
+                dirPath,
+                JSON.stringify(newFilesForPaidMember)
+              );
+              worker.terminate();
+            }
+          );
         });
       }
     } else {

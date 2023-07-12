@@ -47,9 +47,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convert = exports.files = void 0;
+exports.convert = void 0;
 var sharp = require("sharp");
-exports.files = [];
 var convert = function (file, outType, token, cbResult) { return __awaiter(void 0, void 0, void 0, function () {
     var name, out, fileName;
     return __generator(this, function (_a) {
@@ -80,9 +79,6 @@ var convert = function (file, outType, token, cbResult) { return __awaiter(void 
             case 6:
                 if (cbResult) {
                     cbResult(__assign(__assign({}, file), { fileName: fileName, token: token, status: 'complete' }));
-                }
-                else {
-                    exports.files.push(__assign(__assign({}, file), { fileName: fileName, token: token, status: 'complete' }));
                 }
                 return [2 /*return*/];
         }

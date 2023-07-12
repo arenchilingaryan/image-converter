@@ -1,4 +1,5 @@
 "use strict";
+// !!! COMPILE BEFORE USING. COMPILATION IN THE './workerConvert.js'
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,8 +37,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
 var worker_threads_1 = require("worker_threads");
-var convert_1 = require("../../utils/convert");
+var convert_1 = require("./convert");
 if (!worker_threads_1.parentPort || worker_threads_1.isMainThread) {
     throw new Error('Parent port is not available or the script is not running inside a worker');
 }

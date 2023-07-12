@@ -1,8 +1,6 @@
 import * as sharp from 'sharp';
 import { FileType, ResultFileType } from '../types';
 
-export const files: ResultFileType[] = [];
-
 export const convert = async (
   file: FileType,
   outType: 'png' | 'jpeg' | 'gif' | 'webp' | 'jpg',
@@ -31,13 +29,6 @@ export const convert = async (
 
   if (cbResult) {
     cbResult({
-      ...file,
-      fileName,
-      token,
-      status: 'complete',
-    });
-  } else {
-    files.push({
       ...file,
       fileName,
       token,
