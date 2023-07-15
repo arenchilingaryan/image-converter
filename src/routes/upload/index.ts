@@ -1,14 +1,8 @@
 import { Response } from 'express';
 import { queueService } from '../../utils/queue';
-import {
-  RequestFileType,
-  RequestTypeWithUserData,
-  ResultFileType,
-} from '../../types';
+import { RequestFileType, RequestTypeWithUserData } from '../../types';
 import { convertFilesObject } from '../../utils/convertFilesObject';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import { processingByThread } from '../../utils/mainThread';
+import { processingForPaidUser } from './processingForPaidUser';
 
 export const uploadRouter = async (
   req: RequestTypeWithUserData,
@@ -46,44 +40,7 @@ export const uploadRouter = async (
 
   if (userData) {
     if (userData.paymentInfo.expired) {
-      const dateNow = new Date();
-      const expiredDate = new Date(userData.paymentInfo.expired);
-      const diff = expiredDate.getTime() - dateNow.getTime();
-      if (diff > 0) {
-        let files: any = undefined;
-        const dirPath = path.join(
-          __dirname,
-          `../../db/paidFiles/${userData.email}.json`
-        );
-        try {
-          files = JSON.parse(await fs.readFile(dirPath, 'utf8'));
-        } catch (error: any) {
-          if (error.code === 'ENOENT') {
-            files = [];
-          } else {
-            throw error;
-          }
-        }
-        files.push(...newFiles);
-        newFiles.forEach(file => {
-          processingByThread(
-            { file, outType, token },
-            async (data: ResultFileType, worker: any) => {
-              const newFilesForPaidMember = files.map((file: any) => {
-                if (data.hash === file.hash) {
-                  return data;
-                }
-                return file;
-              });
-              await fs.writeFile(
-                dirPath,
-                JSON.stringify(newFilesForPaidMember)
-              );
-              worker.terminate();
-            }
-          );
-        });
-      }
+      processingForPaidUser(userData, newFiles, outType, token);
     } else {
       queueService.add(newFiles, outType, res);
     }

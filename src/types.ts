@@ -48,4 +48,10 @@ export type UserType = {
 
 export type RequestTypeWithUserData = Request & {
   userData?: Omit<UserType, 'password'>;
+  customEmitter?: any;
+};
+
+export type ErrorValidationType = {
+  status: number;
+  message: string;
 };

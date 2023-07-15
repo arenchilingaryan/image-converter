@@ -11,20 +11,14 @@ import { envConfig } from './config/envConfig';
 import { loginRouter } from './routes/auth/login';
 import { check } from 'express-validator';
 import { registerRouter } from './routes/auth/register';
-import { authGuard } from './utils/auth';
+import { authGuard } from './middlewares/auth';
 import { paymentRouter } from './routes/payment/paymentRouter';
 import { paymentGuard } from './routes/payment/paymentGuard';
 import './db';
+import { authCommonGuards } from './middlewares/authGuards';
+import { errorMiddleware } from './middlewares/error';
 
 export const app = express();
-
-const authCommonGuards = [
-  check('email').isEmail().withMessage('Must be a valid email address'),
-  check('password')
-    .exists()
-    .isLength({ min: 6, max: 20 })
-    .withMessage('Password is incorrect'),
-];
 
 app.use(cors());
 app.use(helmet());
@@ -43,6 +37,8 @@ app.post('/upload', authGuard, uploadMiddleware, isFilesIsImage, uploadRouter);
 app.get('/status', authGuard, statusRouter);
 
 app.get('/download/:id', downloadByIdRouter);
+
+app.use(errorMiddleware);
 
 app.listen(envConfig.PORT, () => {
   console.log(`Strarted on port ${envConfig.PORT}`);

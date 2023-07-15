@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { FileType } from '../types';
 import { convert } from './convert';
+import { createQueue } from './createWorkThread';
 
 class ActiveQueue {
   private queue: FileType[] = [];
@@ -28,34 +29,22 @@ class ActiveQueue {
       return;
     }
 
-    const nextFile = this.queue.shift();
-
-    if (nextFile) {
-      if (
-        !this.processing[nextFile.token] ||
-        this.processing[nextFile.token].length === 0
-      ) {
-        this.processing[nextFile.token] = [nextFile];
-        this.processFile(nextFile, outputType, res);
-      } else {
-        this.queue.push(nextFile);
-        setTimeout(() => this.processNext(outputType, res), 1000);
-      }
-    }
-  }
-
-  private processFile(file: FileType, outputType: string, res: Response): void {
-    setTimeout(() => {
-      const files = this.processing[file.token];
-      if (files) {
-        files.shift();
-        if (files.length === 0) {
-          delete this.processing[file.token];
+    const { currentQueue, queue } = createQueue(this.queue);
+    this.queue = queue;
+    for (const item of currentQueue) {
+      convert(
+        item,
+        outputType as 'png' | 'jpeg' | 'gif' | 'webp',
+        item.token,
+        newFile => {
+          this.queue.push(newFile);
         }
-      }
-      convert(file, outputType as 'png' | 'jpeg' | 'gif' | 'webp', file.token);
+      );
+    }
+
+    if (queue.filter(x => x.status === 'waiting').length > 0) {
       this.processNext(outputType, res);
-    }, 1000);
+    }
   }
 
   public isExistFile(fileData: FileType): boolean {

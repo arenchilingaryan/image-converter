@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import { RequestTypeWithUserData, UserType } from '../types';
-import { decodeToken } from './token';
+import { decodeToken } from '../utils/token';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
