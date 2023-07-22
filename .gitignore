@@ -7,3 +7,6 @@ uploads/*
 *jpg
 *png
 *.json
+
+!package.json
+!package-lock.json
